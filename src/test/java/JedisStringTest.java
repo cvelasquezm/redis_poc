@@ -1,24 +1,14 @@
-import conecction.DBConnection;
 import jdk.jfr.Description;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import redis.clients.jedis.Jedis;
 
-public class JedisTest {
+public class JedisStringTest extends BaseJedisTest {
 
-        private Jedis jedis;
-        private DBConnection connection = new DBConnection();
         String key = "key";
         String value = "Hello world";
         String valueToConcat = " Cesar";
         String key1 = "key1";
         String value1 = "value1";
-
-        @Before
-        public void beforeTest() {
-                jedis = connection.connect();
-        }
 
         @Test
         @Description("Testing Set Strings")
@@ -87,6 +77,7 @@ public class JedisTest {
         public void testSetWithExpirationInSecondsString() throws InterruptedException {
 
                 jedis.setex(key, 5, value);
+
                 Assert.assertTrue(jedis.exists(key));
                 Thread.sleep(5000);
                 Assert.assertFalse(jedis.exists(key));
@@ -99,6 +90,7 @@ public class JedisTest {
         public void testSetWithExpirationInMillisString() throws InterruptedException {
 
                 jedis.psetex(key, 5000l, value);
+
                 Assert.assertTrue(jedis.exists(key));
                 Thread.sleep(5000);
                 Assert.assertFalse(jedis.exists(key));
@@ -107,8 +99,22 @@ public class JedisTest {
         }
 
         @Test
+        @Description("Testing Strings with expiration time in millis")
+        public void testSetWithPersistAfterExpirationString() throws InterruptedException {
+
+                jedis.psetex(key, 5000l, value);
+                jedis.persist(key);
+
+                Assert.assertTrue(jedis.exists(key));
+                Thread.sleep(10000);
+                Assert.assertTrue(jedis.exists(key));
+
+                jedis.del(key);
+        }
+
+        @Test
         @Description("Testing MultiGet Strings")
-        public void testMultiGetString() throws InterruptedException {
+        public void testMultiGetString() {
                 jedis.mset(key, value, key1, value1);
 
                 jedis.mget(key, key1);
